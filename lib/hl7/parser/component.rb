@@ -1,5 +1,3 @@
-require 'hl7/component'
-
 module HL7
   class Parser
     class Component
@@ -12,8 +10,7 @@ module HL7
       end
 
       def parse
-        sub_components = input.split(/(?<!#{escape})#{delimiter}/)
-        HL7::Component.new(sub_components: sub_components)
+        input.split(/(?<!#{escape})#{delimiter}/)
       end
     end
   end

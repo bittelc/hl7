@@ -1,5 +1,3 @@
-require 'hl7/field'
-
 module HL7
   class Parser
     class Field
@@ -16,10 +14,9 @@ module HL7
 
       def parse
         repetitions = input.split(/(?<!#{escape})#{repetition}/)
-        components = repetitions.map do |e|
+        repetitions.map do |e|
           e.split(/(?<!#{escape})#{component}/)
         end
-        HL7::Field.new(components: components)
       end
     end
   end

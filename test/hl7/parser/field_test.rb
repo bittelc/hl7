@@ -9,13 +9,13 @@ class HL7ParserFieldTest < Minitest::Test
   def test_normal
     field = '1^2^3^4'
     parsed = @klass.new(input: field, component_delimiter: '^').parse
-    assert_equal 4, parsed.length
+    assert_equal 4, parsed[0].length
   end
 
   def test_other_delimiters
     field = '1^a2a3a4'
     parsed = @klass.new(input: field, component_delimiter: 'a').parse
-    assert_equal 4, parsed.length
+    assert_equal 4, parsed[0].length
   end
 
   def test_repetition
@@ -23,8 +23,6 @@ class HL7ParserFieldTest < Minitest::Test
     parsed = @klass.new(input: field,
                         component_delimiter: '^',
                         repetition_delimiter: '~').parse
-    assert_equal 2, parsed.repetitions
-    assert_equal 4, parsed.length
     assert_equal 3, parsed[1].length
     assert_equal 3, parsed.fetch(1).length
   end
@@ -35,8 +33,6 @@ class HL7ParserFieldTest < Minitest::Test
                         component_delimiter: '^',
                         repetition_delimiter: '~',
                         escape: '\\').parse
-    assert_equal 2, parsed.repetitions
-    assert_equal 4, parsed.length
     assert_equal 3, parsed[1].length
     assert_equal 3, parsed.fetch(1).length
   end

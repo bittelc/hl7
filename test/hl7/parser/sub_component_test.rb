@@ -9,6 +9,6 @@ class HL7ParserValueTest < Minitest::Test
   def test_this_is_just_a_string_value_object
     v = '\\my^value%with&many~meta|characters'
     obj = @klass.new(input: v).parse
-    assert_equal v, obj.content
+    assert_equal v, obj
   end
 end

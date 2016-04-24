@@ -1,5 +1,3 @@
-require 'hl7/segment'
-
 module HL7
   class Parser
     class Segment
@@ -7,15 +5,17 @@ module HL7
 
       def initialize(input: '', delimiter: '|', escape: '\\')
         @input = input
-        @delimiter = Regexp.escape delimiter
-        @escape = Regexp.escape escape
+        @delimiter = delimiter
+        @escape = escape
       end
 
       def parse
-        fields = input.split(/(?<!#{escape})#{delimiter}/)
+        e = Regexp.escape escape
+        d = Regexp.escape delimiter
+        fields = input.split(/(?<!#{e})#{d}/)
         type = fields.shift
         fields.unshift(delimiter) if type == 'MSH'
-        HL7::Segment.new(type: type, fields: fields)
+        { type: type, content: fields }
       end
     end
   end

@@ -1,5 +1,3 @@
-require 'hl7/message'
-
 module HL7
   class Parser
     class Message
@@ -16,7 +14,6 @@ module HL7
           .split(/(?<!#{escape})#{delimiter}/)
           # TODO: strip escapes
           # .map { |e| e.gsub(/(?<!#{escape})#{escape}/, '') }
-        HL7::Message.new(segments: segments)
       end
     end
   end

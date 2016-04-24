@@ -1,5 +1,3 @@
-require 'hl7/sub_component'
-
 module HL7
   class Parser
     class SubComponent
@@ -10,7 +8,7 @@ module HL7
       end
 
       def parse
-        HL7::SubComponent.new(content: input)
+        input
       end
     end
   end
