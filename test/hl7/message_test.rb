@@ -1,4 +1,3 @@
-require 'english'
 require 'test_helper'
 require 'hl7/message'
 
