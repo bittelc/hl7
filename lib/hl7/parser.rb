@@ -42,16 +42,18 @@ module HL7
         delimiter: delimiters.field,
         escape: delimiters.escape
       ).parse
-      parsed = if fields[:type] == 'MSH'
-                 msh_fields(fields[:content])
-               else
-                 fields[:content].map { |e| parse_field(e) }
-               end
-      HL7::Segment.new(type: fields[:type], fields: parsed)
+      HL7::Segment.new(
+        type: fields[:type],
+        fields: fields_for_segment(fields[:type], fields[:content])
+      )
     end
 
-    def msh_fields(fields)
-      fields[0..1] + fields[2..-1].map { |e| parse_field(e) }
+    def fields_for_segment(type, fields)
+      if type == 'MSH'
+        fields[0..1] + fields[2..-1].map { |e| parse_field(e) }
+      else
+        fields.map { |e| parse_field(e) }
+      end
     end
 
     def parse_field(input)

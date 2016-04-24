@@ -18,7 +18,7 @@ module HL7
       components[i]
     end
 
-    alias_method :fetch, :[]
+    alias fetch []
 
     def to_s(delimiter: '^', repetition: '~')
       components.map { |e| e.join(delimiter) }.join(repetition)

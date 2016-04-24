@@ -4,7 +4,11 @@ module HL7
     attr_reader :fields, :type
 
     def initialize(fields: [], type: nil)
-      raise ArgumentError, "Type must be 3 characters long: #{type}" unless type.length == 3
+      if type.length != 3
+        raise ArgumentError, <<-MSG
+"Type must be 3 characters long: #{type}"
+        MSG
+      end
       @fields = fields
       @type = type
     end

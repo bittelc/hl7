@@ -10,10 +10,9 @@ module HL7
       end
 
       def parse
-        segments = input
-          .split(/(?<!#{escape})#{delimiter}/)
-          # TODO: strip escapes
-          # .map { |e| e.gsub(/(?<!#{escape})#{escape}/, '') }
+        input.split(/(?<!#{escape})#{delimiter}/)
+        # TODO: strip escapes
+        # .map { |e| e.gsub(/(?<!#{escape})#{escape}/, '') }
       end
     end
   end
