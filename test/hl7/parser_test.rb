@@ -61,12 +61,10 @@ class HL7ParserTest < Minitest::Test
       expectation: {
         field: [
           { component: [{ sub_component: 'foo' }] },
-          {
-            component: [
-              { sub_component: 'bar' },
-              { sub_component: 'baz' }
-            ]
-          },
+          { component: [
+            { sub_component: 'bar' },
+            { sub_component: 'baz' }
+          ] },
           { component: [{ sub_component: 'bing' }] }
         ]
       },
@@ -87,39 +85,43 @@ class HL7ParserTest < Minitest::Test
           type: 'PV1',
           fields: [
             { field: [{ component: [{ sub_component: 'spam' }] }] },
-            {
-              field: [
-                { component: [{ sub_component: 'green' }] },
-                { component: [{ sub_component: 'eggs' }] }
-              ]
-            },
-            {
-              field: [
-                { component: [{ sub_component: 'knights' }] },
-                {
-                  component: [
-                    { sub_component: 'of' },
-                    { sub_component: 'the' }
-                  ]
-                },
-                { component: [{ sub_component: 'round' }] }
-              ]
-            },
-            {
-              field: [
-                {
-                  component: [
-                    { sub_component: 'just' },
-                    { sub_component: 'sub' },
-                    { sub_component: 'components' }
-                  ]
-                }
-              ]
-            }
+            { field: [
+              { component: [{ sub_component: 'green' }] },
+              { component: [{ sub_component: 'eggs' }] }
+            ] },
+            { field: [
+              { component: [{ sub_component: 'knights' }] },
+              {
+                component: [{ sub_component: 'of' }, { sub_component: 'the' }]
+              },
+              { component: [{ sub_component: 'round' }] }
+            ] },
+            { field: [
+              { component: [
+                { sub_component: 'just' },
+                { sub_component: 'sub' },
+                { sub_component: 'components' }
+              ] }
+            ] }
           ]
         }
       },
       parse_method: :segment
+    },
+    {
+      parse_method: :msh_segment,
+      input: 'MSH|^~\\&|another^field',
+      expectation: {
+        segment: {
+          type: 'MSH',
+          fields: [
+            { field: [
+              { component: [{ sub_component: 'another' }] },
+              { component: [{ sub_component: 'field' }] }]
+            }
+          ]
+        }
+      }
     }
   ].each do |h|
     equality_test_for(h)

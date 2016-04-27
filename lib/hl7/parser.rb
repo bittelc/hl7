@@ -32,5 +32,12 @@ module HL7
         fields.repeat(1).as(:fields)
       ).as(:segment)
     end
+    rule(:msh_segment) do
+      (
+        str('MSH').as(:type) >>
+        str('|^~\\&|') >>
+        fields.repeat(1).as(:fields)
+      ).as(:segment)
+    end
   end
 end
