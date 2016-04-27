@@ -1,10 +1,10 @@
 require 'test_helper'
-require 'hl7/message_parser'
+require 'hl7/parser'
 
 # rubocop:disable ClassLength
 class HL7ParserTest < Minitest::Test
   def setup
-    @klass = HL7::MessageParser
+    @klass = HL7::Parser
     @obj = @klass.new
   end
 

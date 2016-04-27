@@ -3,7 +3,7 @@ require 'parslet'
 module HL7
   # TODO: doc
   # :nodoc:
-  class MessageParser < Parslet::Parser
+  class Parser < Parslet::Parser
     rule(:sub_component) { match['^&'].repeat(1).as(:sub_component) }
     rule(:sub_components) do
       (
