@@ -79,6 +79,47 @@ class HL7ParserTest < Minitest::Test
         { field: [{ component: [{ sub_component: 'eggs' }] }] }
       ],
       parse_method: :fields
+    },
+    {
+      input: 'PV1|spam|green^eggs|knights^of&the^round|just&sub&components',
+      expectation: {
+        segment: {
+          type: 'PV1',
+          fields: [
+            { field: [{ component: [{ sub_component: 'spam' }] }] },
+            {
+              field: [
+                { component: [{ sub_component: 'green' }] },
+                { component: [{ sub_component: 'eggs' }] }
+              ]
+            },
+            {
+              field: [
+                { component: [{ sub_component: 'knights' }] },
+                {
+                  component: [
+                    { sub_component: 'of' },
+                    { sub_component: 'the' }
+                  ]
+                },
+                { component: [{ sub_component: 'round' }] }
+              ]
+            },
+            {
+              field: [
+                {
+                  component: [
+                    { sub_component: 'just' },
+                    { sub_component: 'sub' },
+                    { sub_component: 'components' }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      parse_method: :segment
     }
   ].each do |h|
     equality_test_for(h)
