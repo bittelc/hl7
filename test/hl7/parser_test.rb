@@ -24,32 +24,6 @@ class HL7ParserTest < Minitest::Test
   end
   # rubocop:enable MethodLength
 
-  def test_parse_subcomponents
-    s = 'foo&bar&baz&'
-    @obj.sub_components.parse(s)
-  end
-
-  def test_parse_component
-    s = 'foo&bar&baz'
-    @obj.component.parse(s)
-  end
-
-  def test_parse_components
-    s = 'foo^bar'
-    @obj.components.parse(s)
-  end
-
-  def test_parse_field
-    s = 'foo^bar&baz&bong^bing'
-    assert_equal({ field: s }, @obj.field.parse(s))
-  end
-
-  def test_parse_fields
-    s = 'spam|eggs'
-    e = [{ field: 'spam' }, { field: 'eggs' }]
-    assert_equal e, @obj.fields.parse(s)
-  end
-
   [
     {
       input: 'foo',
