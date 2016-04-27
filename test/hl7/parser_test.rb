@@ -39,7 +39,6 @@ class HL7ParserTest < Minitest::Test
       parse_method: :sub_components
     },
     {
-      skipped: true,
       input: 'foo&bar',
       expectation: {
         component: [
@@ -50,37 +49,34 @@ class HL7ParserTest < Minitest::Test
       parse_method: :component
     },
     {
-      skipped: true,
       input: 'foo^bar',
       expectation: [
-        { component: { sub_component: 'foo' } },
-        { component: { sub_component: 'bar' } }
+        { component: [{ sub_component: 'foo' }] },
+        { component: [{ sub_component: 'bar' }] }
       ],
       parse_method: :components
     },
     {
-      skipped: true,
       input: 'foo^bar&baz&^bing',
       expectation: {
         field: [
-          { component: { sub_component: 'foo' } },
+          { component: [{ sub_component: 'foo' }] },
           {
             component: [
               { sub_component: 'bar' },
               { sub_component: 'baz' }
             ]
           },
-          { component: { sub_component: 'bing' } }
+          { component: [{ sub_component: 'bing' }] }
         ]
       },
       parse_method: :field
     },
     {
-      skipped: true,
       input: 'spam|eggs',
       expectation: [
-        { field: { component: { sub_component: 'spam' } } },
-        { field: { component: { sub_component: 'eggs' } } }
+        { field: [{ component: [{ sub_component: 'spam' }] }] },
+        { field: [{ component: [{ sub_component: 'eggs' }] }] }
       ],
       parse_method: :fields
     }
