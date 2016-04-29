@@ -9,7 +9,6 @@ A low-performance HL7v2 message parser
     bundle install
     bundle exec rake
 
-
 ## To do
 
 * include repetitions
