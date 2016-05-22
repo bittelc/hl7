@@ -57,24 +57,52 @@ class HL7ParserTest < Minitest::Test
       parse_method: :components
     },
     {
+      parse_method: :repetition,
+      input: 'foo^bar',
+      expectation: {
+        repetition: [
+          { component: [{ sub_component: 'foo' }] },
+          { component: [{ sub_component: 'bar' }] }
+        ]
+      }
+    },
+    {
+      parse_method: :repetitions,
+      input: 'foo^bar~baz^quxx',
+      expectation: [
+        { repetition: [
+          { component: [{ sub_component: 'foo' }] },
+          { component: [{ sub_component: 'bar' }] }
+        ] },
+        { repetition: [
+          { component: [{ sub_component: 'baz' }] },
+          { component: [{ sub_component: 'quxx' }] }
+        ] }
+      ]
+    },
+    {
       input: 'foo^bar&baz&^bing',
       expectation: {
-        field: [
+        field: [{ repetition: [
           { component: [{ sub_component: 'foo' }] },
           { component: [
             { sub_component: 'bar' },
             { sub_component: 'baz' }
           ] },
           { component: [{ sub_component: 'bing' }] }
-        ]
+        ] }]
       },
       parse_method: :field
     },
     {
       input: 'spam|eggs',
       expectation: [
-        { field: [{ component: [{ sub_component: 'spam' }] }] },
-        { field: [{ component: [{ sub_component: 'eggs' }] }] }
+        { field: [
+          { repetition: [{ component: [{ sub_component: 'spam' }] }] }
+        ] },
+        { field: [
+          { repetition: [{ component: [{ sub_component: 'eggs' }] }] }
+        ] }
       ],
       parse_method: :fields
     },
@@ -84,25 +112,27 @@ class HL7ParserTest < Minitest::Test
         segment: {
           type: 'PV1',
           fields: [
-            { field: [{ component: [{ sub_component: 'spam' }] }] },
             { field: [
+              { repetition: [{ component: [{ sub_component: 'spam' }] }] }
+            ] },
+            { field: [{ repetition: [
               { component: [{ sub_component: 'green' }] },
               { component: [{ sub_component: 'eggs' }] }
-            ] },
-            { field: [
+            ] }] },
+            { field: [{ repetition: [
               { component: [{ sub_component: 'knights' }] },
               {
                 component: [{ sub_component: 'of' }, { sub_component: 'the' }]
               },
               { component: [{ sub_component: 'round' }] }
-            ] },
-            { field: [
+            ] }] },
+            { field: [{ repetition: [
               { component: [
                 { sub_component: 'just' },
                 { sub_component: 'sub' },
                 { sub_component: 'components' }
               ] }
-            ] }
+            ] }] }
           ]
         }
       },
@@ -115,9 +145,9 @@ class HL7ParserTest < Minitest::Test
         header: {
           type: 'MSH',
           fields: [
-            { field: [
+            { field: [{ repetition: [
               { component: [{ sub_component: 'another' }] },
-              { component: [{ sub_component: 'field' }] }]
+              { component: [{ sub_component: 'field' }] }] }]
             }
           ]
         }
@@ -133,8 +163,12 @@ class HL7ParserTest < Minitest::Test
             { segment: {
               type: 'PID',
               fields: [
-                { field: [{ component: [{ sub_component: 'foo' }] }] },
-                { field: [{ component: [{ sub_component: 'bar' }] }] }
+                { field: [
+                  { repetition: [{ component: [{ sub_component: 'foo' }] }] }
+                ] },
+                { field: [
+                  { repetition: [{ component: [{ sub_component: 'bar' }] }] }
+                ] }
               ] }
             }
           ]
