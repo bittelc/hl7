@@ -30,9 +30,7 @@ module HL7
       ).absent? >> any
     end
     rule(:sub_component) { normal_character.repeat(1).as(:sub_component) }
-    rule(:sub_components) do
-      (sub_component >> sub_component_delimiter.maybe).repeat(1)
-    end
+    rule(:sub_components) { (sub_component >> sub_component_delimiter.maybe).repeat(1) }
     rule(:component) { sub_components.repeat(1).as(:component) }
     rule(:components) { (component >> component_delimiter.maybe).repeat(1) }
     rule(:repetition) { components.repeat(1).as(:repetition) }
