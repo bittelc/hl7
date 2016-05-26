@@ -4,12 +4,21 @@ module HL7
   # TODO: doc
   # :nodoc:
   class Parser < Parslet::Parser
+    def initialize(field: '|', component: '^', sub_component: '&',
+                   repetition: '~', escape: '\\')
+      @field = field
+      @component = component
+      @sub_component = sub_component
+      @repetition = repetition
+      @escape = escape
+    end
+
     rule(:segment_delimiter) { str("\r") }
-    rule(:field_delimiter) { str('|') }
-    rule(:component_delimiter) { str('^') }
-    rule(:sub_component_delimiter) { str('&') }
-    rule(:escape) { str('\\') }
-    rule(:repetition_delimiter) { str('~') }
+    rule(:field_delimiter) { str(@field) }
+    rule(:component_delimiter) { str(@component) }
+    rule(:sub_component_delimiter) { str(@sub_component) }
+    rule(:escape) { str(@escape) }
+    rule(:repetition_delimiter) { str(@repetition) }
     rule(:normal_character) do
       (
         segment_delimiter |
@@ -26,7 +35,9 @@ module HL7
     end
     rule(:component) { sub_components.repeat(1).as(:component) }
     rule(:components) { (component >> component_delimiter.maybe).repeat(1) }
-    rule(:field) { components.repeat(1).as(:field) }
+    rule(:repetition) { components.repeat(1).as(:repetition) }
+    rule(:repetitions) { (repetition >> repetition_delimiter.maybe).repeat(1) }
+    rule(:field) { repetitions.repeat(1).as(:field) }
     rule(:fields) { (field >> field_delimiter.maybe).repeat(1) }
     rule(:segment_type) { match['[:alnum:]'].repeat(3, 3).as(:type) }
     rule(:segment) do

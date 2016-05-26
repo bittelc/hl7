@@ -11,7 +11,8 @@ A low-performance HL7v2 message parser
 
 ## To do
 
-* include repetitions
-* dynamically set delimiters from header
-* transform into an AST
-* handle escaped metacharacters
+- [X] include repetitions
+- [ ] dynamically set delimiters from header
+- [ ] transform into an AST
+- [ ] handle escaped metacharacters
+- [ ] overhaul tests
