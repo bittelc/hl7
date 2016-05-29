@@ -155,7 +155,7 @@ class HL7ParserTest < Minitest::Test
     },
     {
       parse_method: :message,
-      input: "MSH|^~\\&|\rPID|foo|bar",
+      input: 	"MSH|^~\\&|\rPID|foo&sop^baz|bar",
       expectation: {
         message: {
           header: { type: 'MSH', fields: [] },
@@ -164,7 +164,15 @@ class HL7ParserTest < Minitest::Test
               type: 'PID',
               fields: [
                 { field: [
-                  { repetition: [{ component: [{ sub_component: 'foo' }] }] }
+                  { repetition: [
+                    { component: [
+                      { sub_component: 'foo' },
+                      { sub_component: 'sop' }
+                    ] },
+                    { component: [
+                      { sub_component: 'baz' }
+                    ] }
+                  ] }
                 ] },
                 { field: [
                   { repetition: [{ component: [{ sub_component: 'bar' }] }] }
