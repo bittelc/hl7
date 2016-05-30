@@ -144,11 +144,13 @@ class HL7ParserTest < Minitest::Test
       expectation: {
         header: {
           type: 'MSH',
-          field_delimiter: '|',
-          component_delimiter: '^',
-          repetition_delimiter: '~',
-          escape: '\\',
-          sub_component_delimiter: '&',
+          char_sets: {
+            field_delimiter: '|',
+            component_delimiter: '^',
+            repetition_delimiter: '~',
+            escape: '\\',
+            sub_component_delimiter: '&'
+          },
           fields: [
             { field: [{ repetition: [
               { component: [{ sub_component: 'another' }] },
@@ -165,11 +167,13 @@ class HL7ParserTest < Minitest::Test
         message: {
           header: {
             type: 'MSH',
-            field_delimiter: '|',
-            component_delimiter: '^',
-            repetition_delimiter: '~',
-            escape: '\\',
-            sub_component_delimiter: '&',
+            char_sets: {
+              field_delimiter: '|',
+              component_delimiter: '^',
+              repetition_delimiter: '~',
+              escape: '\\',
+              sub_component_delimiter: '&'
+            },
             fields: []
           },
           segments: [
