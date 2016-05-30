@@ -4,21 +4,12 @@ module HL7
   # TODO: doc
   # :nodoc:
   class Parser < Parslet::Parser
-    def initialize(field: '|', component: '^', sub_component: '&',
-                   repetition: '~', escape: '\\')
-      @field = field
-      @component = component
-      @sub_component = sub_component
-      @repetition = repetition
-      @escape = escape
-    end
-
     rule(:segment_delimiter) { str("\r") }
-    rule(:field_delimiter) { str(@field) }
-    rule(:component_delimiter) { str(@component) }
-    rule(:sub_component_delimiter) { str(@sub_component) }
-    rule(:escape) { str(@escape) }
-    rule(:repetition_delimiter) { str(@repetition) }
+    rule(:field_delimiter) { str('|') }
+    rule(:component_delimiter) { str('^') }
+    rule(:sub_component_delimiter) { str('&') }
+    rule(:escape) { str('\\') }
+    rule(:repetition_delimiter) { str('~') }
     rule(:normal_character) do
       (
         segment_delimiter |
@@ -68,4 +59,4 @@ module HL7
   end
 end
 # Can call parser with
-# irb> HL7::Parse.new.parse("MSH....")
+# irb> pp HL7::Parse.new.parse("MSH....")
