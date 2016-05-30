@@ -39,12 +39,12 @@ module HL7
     rule(:msh_segment) do
       (
         str('MSH').as(:type) >>
-        field_delimiter >>
-        component_delimiter >>
-        repetition_delimiter >>
-        escape >>
-        sub_component_delimiter >>
-        field_delimiter >>
+        field_delimiter.as(:field_delimiter) >>
+        component_delimiter.as(:component_delimiter) >>
+        repetition_delimiter.as(:repetition_delimiter) >>
+        escape.as(:escape) >>
+        sub_component_delimiter.as(:sub_component_delimiter) >>
+        field_delimiter.as(:field_delimiter) >>
         fields.repeat.as(:fields)
       ).as(:header)
     end
