@@ -4,12 +4,21 @@ module HL7
   # TODO: doc
   # :nodoc:
   class Parser < Parslet::Parser
+    attr_accessor :field_delimiter, :component_delimiter, :repetition_delimiter, :subcomponent_delimiter
+    def initialize(options = {})
+        self.field_delimiter = options[:field] || ''
+        self.component_delimiter = options[:component] || ''
+        self.repetition_delimiter = options[:repetition] || ''
+        self.subcomponent_delimiter = options[:subcomponent] || ''
+    end
+
+    rule(:valid_delimiters) { str('|') | str('^') | str('&') | str('~') }
     rule(:segment_delimiter) { str("\r") }
-    rule(:field_delimiter) { str('|') }
-    rule(:component_delimiter) { str('^') }
-    rule(:sub_component_delimiter) { str('&') }
+    rule(:field_delimiter) { valid_delimiters }
+    rule(:component_delimiter) { valid_delimiters }
+    rule(:sub_component_delimiter) { valid_delimiters }
     rule(:escape) { str('\\') }
-    rule(:repetition_delimiter) { str('~') }
+    rule(:repetition_delimiter) { valid_delimiters }
     rule(:normal_character) do
       (
         segment_delimiter |
