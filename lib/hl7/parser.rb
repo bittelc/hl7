@@ -36,15 +36,20 @@ module HL7
         fields.repeat.as(:fields)
       ).as(:segment)
     end
+    rule(:char_sets) do 
+     (
+       field_delimiter.as(:field_delimiter) >>
+       component_delimiter.as(:component_delimiter) >>
+       repetition_delimiter.as(:repetition_delimiter) >>
+       escape.as(:escape) >>
+       sub_component_delimiter.as(:sub_component_delimiter) >>
+       field_delimiter.as(:field_delimiter)
+     )
+    end   
     rule(:msh_segment) do
       (
         str('MSH').as(:type) >>
-        field_delimiter.as(:field_delimiter) >>
-        component_delimiter.as(:component_delimiter) >>
-        repetition_delimiter.as(:repetition_delimiter) >>
-        escape.as(:escape) >>
-        sub_component_delimiter.as(:sub_component_delimiter) >>
-        field_delimiter.as(:field_delimiter) >>
+        char_sets.as(:char_sets) >>
         fields.repeat.as(:fields)
       ).as(:header)
     end
