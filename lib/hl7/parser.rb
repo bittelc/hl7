@@ -64,5 +64,8 @@ module HL7
         segment.repeat.as(:segments)
       ).as(:message)
     end
+    root(:message)
   end
 end
+# Can call parser with
+# irb> HL7::Parse.new.parse("MSH....")
