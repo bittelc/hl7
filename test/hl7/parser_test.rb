@@ -77,7 +77,7 @@ class HL7ParserTest < Minitest::Test
     end
 
     describe '#field' do
-      it 'should container child repetitions' do
+      it 'should contain child repetitions' do
         response = @klass.send(:field).parse('foo^bar&baz&^bing')
         expectation = {
           field: [{ repetition: [
@@ -107,108 +107,119 @@ class HL7ParserTest < Minitest::Test
         assert_equal expectation, response
       end
     end
-  #   },
-  #   {
-  #     input: 'PV1|spam|green^eggs|knights^of&the^round|just&sub&components',
-  #     expectation: {
-  #       segment: {
-  #         type: 'PV1',
-  #         fields: [
-  #           { field: [
-  #             { repetition: [{ component: [{ sub_component: 'spam' }] }] }
-  #           ] },
-  #           { field: [{ repetition: [
-  #             { component: [{ sub_component: 'green' }] },
-  #             { component: [{ sub_component: 'eggs' }] }
-  #           ] }] },
-  #           { field: [{ repetition: [
-  #             { component: [{ sub_component: 'knights' }] },
-  #             {
-  #               component: [{ sub_component: 'of' }, { sub_component: 'the' }]
-  #             },
-  #             { component: [{ sub_component: 'round' }] }
-  #           ] }] },
-  #           { field: [{ repetition: [
-  #             { component: [
-  #               { sub_component: 'just' },
-  #               { sub_component: 'sub' },
-  #               { sub_component: 'components' }
-  #             ] }
-  #           ] }] }
-  #         ]
-  #       }
-  #     },
-  #     parse_method: :segment
-  #   },
-  #   {
-  #     parse_method: :msh_segment,
-  #     input: 'MSH|^~\\&|another^field',
-  #     expectation: {
-  #       header: {
-  #         type: 'MSH',
-  #         char_sets: {
-  #           field_delimiter: '|',
-  #           component_delimiter: '^',
-  #           repetition_delimiter: '~',
-  #           escape: '\\',
-  #           sub_component_delimiter: '&'
-  #         },
-  #         fields: [
-  #           { field: [{ repetition: [
-  #             { component: [{ sub_component: 'another' }] },
-  #             { component: [{ sub_component: 'field' }] }] }]
-  #           }
-  #         ]
-  #       }
-  #     }
-  #   },
-  #   {
-  #     parse_method: :message,
-  #     input: 	"MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar",
-  #     expectation: {
-  #       message: {
-  #         header: {
-  #           type: 'MSH',
-  #           char_sets: {
-  #             field_delimiter: '|',
-  #             component_delimiter: '^',
-  #             repetition_delimiter: '~',
-  #             escape: '\\',
-  #             sub_component_delimiter: '&'
-  #           },
-  #           fields: []
-  #         },
-  #         segments: [
-  #           { segment: {
-  #             type: 'PID',
-  #             fields: [
-  #               { field: [
-  #                 { repetition: [
-  #                   { component: [
-  #                     { sub_component: 'foo' },
-  #                     { sub_component: 'sop' }
-  #                   ] },
-  #                   { component: [
-  #                     { sub_component: 'baz' }
-  #                   ] }
-  #                 ] },
-  #                 { repetition: [
-  #                   { component: [
-  #                     { sub_component: 'foo2' }
-  #                   ] },
-  #                   { component: [
-  #                     { sub_component: 'ro' }
-  #                   ] }
-  #                 ] }
-  #               ] },
-  #               { field: [
-  #                 { repetition: [{ component: [{ sub_component: 'bar' }] }] }
-  #               ] }
-  #             ] }
-  #           }
-  #         ]
-  #       }
-  #     }
-  #   }
+
+    describe '#segment' do
+      it 'should contain child fields' do
+        response = @klass.send(:segment).parse(
+          'PV1|spam|green^eggs|knights^of&the^round|just&sub&components'
+        )
+        expectation = {
+          segment: {
+            type: 'PV1',
+            fields: [
+              { field: [
+                { repetition: [{ component: [{ sub_component: 'spam' }] }] }
+              ] },
+              { field: [{ repetition: [
+                { component: [{ sub_component: 'green' }] },
+                { component: [{ sub_component: 'eggs' }] }
+              ] }] },
+              { field: [{ repetition: [
+                { component: [{ sub_component: 'knights' }] },
+                {
+                  component: [{ sub_component: 'of' }, { sub_component: 'the' }]
+                },
+                { component: [{ sub_component: 'round' }] }
+              ] }] },
+              { field: [{ repetition: [
+                { component: [
+                  { sub_component: 'just' },
+                  { sub_component: 'sub' },
+                  { sub_component: 'components' }
+                ] }
+              ] }] }
+            ]
+          }
+        }
+        assert_equal expectation, response
+      end
+    end
+
+    describe '#msh_segment' do
+      it 'should parse delimiters' do
+        custom_class = HL7::Parser.new(fd: '&', cd: '~', rd: '|', sd: '^')
+        response = custom_class.send(:msh_segment).parse('MSH&~|\\^&another~field')
+        expectation = {
+          header: {
+            type: 'MSH',
+            char_sets: {
+              field_delimiter: '&',
+              component_delimiter: '~',
+              repetition_delimiter: '|',
+              escape: '\\',
+              sub_component_delimiter: '^'
+            },
+            fields: [
+              { field: [{ repetition: [
+                { component: [{ sub_component: 'another' }] },
+                { component: [{ sub_component: 'field' }] }] }]
+              }
+            ]
+          }
+        }
+        assert_equal expectation, response
+      end
+    end
+
+    describe '#field' do
+      it 'should parse multiple fields' do
+        response = @klass.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
+        expectation = {
+          message: {
+            header: {
+              type: 'MSH',
+              char_sets: {
+                field_delimiter: '|',
+                component_delimiter: '^',
+                repetition_delimiter: '~',
+                escape: '\\',
+                sub_component_delimiter: '&'
+              },
+              fields: []
+            },
+            segments: [
+              { segment: {
+                type: 'PID',
+                fields: [
+                  { field: [
+                    { repetition: [
+                      { component: [
+                        { sub_component: 'foo' },
+                        { sub_component: 'sop' }
+                      ] },
+                      { component: [
+                        { sub_component: 'baz' }
+                      ] }
+                    ] },
+                    { repetition: [
+                      { component: [
+                        { sub_component: 'foo2' }
+                      ] },
+                      { component: [
+                        { sub_component: 'ro' }
+                      ] }
+                    ] }
+                  ] },
+                  { field: [
+                    { repetition: [{ component: [{ sub_component: 'bar' }] }] }
+                  ] }
+                ] }
+              }
+            ]
+          }
+        }
+        assert_equal expectation, response
+      end
+    end
   end
 end
