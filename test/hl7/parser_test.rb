@@ -8,29 +8,36 @@ class HL7ParserTest < Minitest::Test
       @klass = HL7::Parser.new(fd: '|', cd: '^', rd: '~', sd: '&')
     end
 
-    describe 'sub_component' do
-      it 'should contain a single subcomponent' do
+    describe '#sub_component' do
+      it 'should parse a single sub_component' do
         response = @klass.send(:sub_component).parse('foo')
         expectation = { sub_component: 'foo' }
         assert_equal expectation, response
       end
     end
 
-    describe 'sub_components' do
-      it 'should contain two subcomponents' do
-        response = @klass.send(:components).parse('foo&bar')
-        expectation = [{
-          component: [
-            { sub_component: 'foo' },
-            { sub_component: 'bar' }
-          ]
-        }]
+    describe '#sub_components' do
+      it 'should parse mutliple sub_components' do
+        response = @klass.send(:sub_components).parse('foo&bar&')
+        expectation = [
+          { sub_component: 'foo' },
+          { sub_component: 'bar' }
+        ]
         assert_equal expectation, response
       end
     end
-
-    describe 'hard_coding' do
-      it 'should hardcode the delimiter values' do
+    describe '#component' do
+      it 'should contain child sub_components' do
+        response = @klass.send(:component).parse('foo&bar')
+        expectation = { component: [
+          { sub_component: 'foo' },
+          { sub_component: 'bar' }
+        ] }
+        assert_equal expectation, response
+      end
+    end
+    describe '#components' do
+      it 'should parse multiple components' do
         response = @klass.send(:components).parse('foo^bar')
         expectation = [
           { component: [{ sub_component: 'foo' }] },
@@ -39,104 +46,67 @@ class HL7ParserTest < Minitest::Test
         assert_equal expectation, response
       end
     end
-  end
+    describe '#repetition' do
+      it 'should contain child components' do
+        response = @klass.send(:repetition).parse('foo^bar')
+        expectation = {
+          repetition: [
+            { component: [{ sub_component: 'foo' }] },
+            { component: [{ sub_component: 'bar' }] }
+          ]
+        }
+        assert_equal expectation, response
+      end
+    end
 
-  # def self.equality_test_for(
-  #   input: '',
-  #   expectation: nil,
-  #   parse_method: nil,
-  #   skipped: false
-  # )
-  #   @counter ||= 0
-  #   @counter += 1
-  #   define_method("test_#{@counter}_#{parse_method}") do
-  #     skip if skipped
-  #     assert_equal expectation, @obj.send(parse_method).parse(input)
-  #   end
-  # end
-  # # rubocop:enable MethodLength
+    describe '#repetitions' do
+      it 'should parse multiple repetitions' do
+        response = @klass.send(:repetitions).parse('foo^bar~baz^quxx')
+        expectation = [
+          { repetition: [
+            { component: [{ sub_component: 'foo' }] },
+            { component: [{ sub_component: 'bar' }] }
+          ] },
+          { repetition: [
+            { component: [{ sub_component: 'baz' }] },
+            { component: [{ sub_component: 'quxx' }] }
+          ] }
+        ]
+        assert_equal expectation, response
+      end
+    end
 
-  # [
-  #   {
-  #     input: 'foo',
-  #     expectation: { sub_component: 'foo' },
-  #     parse_method: :sub_component
-  #   },
-  #   {
-  #     input: 'foo&bar&',
-  #     expectation: [
-  #       { sub_component: 'foo' },
-  #       { sub_component: 'bar' }
-  #     ],
-  #     parse_method: :sub_components
-  #   },
-  #   {
-  #     input: 'foo&bar',
-  #     expectation: {
-  #       component: [
-  #         { sub_component: 'foo' },
-  #         { sub_component: 'bar' }
-  #       ]
-  #     },
-  #     parse_method: :component
-  #   },
-  #   {
-  #     input: 'foo^bar',
-  #     expectation: [
-  #       { component: [{ sub_component: 'foo' }] },
-  #       { component: [{ sub_component: 'bar' }] }
-  #     ],
-  #     parse_method: :components
-  #   },
-  #   {
-  #     parse_method: :repetition,
-  #     input: 'foo^bar',
-  #     expectation: {
-  #       repetition: [
-  #         { component: [{ sub_component: 'foo' }] },
-  #         { component: [{ sub_component: 'bar' }] }
-  #       ]
-  #     }
-  #   },
-  #   {
-  #     parse_method: :repetitions,
-  #     input: 'foo^bar~baz^quxx',
-  #     expectation: [
-  #       { repetition: [
-  #         { component: [{ sub_component: 'foo' }] },
-  #         { component: [{ sub_component: 'bar' }] }
-  #       ] },
-  #       { repetition: [
-  #         { component: [{ sub_component: 'baz' }] },
-  #         { component: [{ sub_component: 'quxx' }] }
-  #       ] }
-  #     ]
-  #   },
-  #   {
-  #     input: 'foo^bar&baz&^bing',
-  #     expectation: {
-  #       field: [{ repetition: [
-  #         { component: [{ sub_component: 'foo' }] },
-  #         { component: [
-  #           { sub_component: 'bar' },
-  #           { sub_component: 'baz' }
-  #         ] },
-  #         { component: [{ sub_component: 'bing' }] }
-  #       ] }]
-  #     },
-  #     parse_method: :field
-  #   },
-  #   {
-  #     input: 'spam|eggs',
-  #     expectation: [
-  #       { field: [
-  #         { repetition: [{ component: [{ sub_component: 'spam' }] }] }
-  #       ] },
-  #       { field: [
-  #         { repetition: [{ component: [{ sub_component: 'eggs' }] }] }
-  #       ] }
-  #     ],
-  #     parse_method: :fields
+    describe '#field' do
+      it 'should container child repetitions' do
+        response = @klass.send(:field).parse('foo^bar&baz&^bing')
+        expectation = {
+          field: [{ repetition: [
+            { component: [{ sub_component: 'foo' }] },
+            { component: [
+              { sub_component: 'bar' },
+              { sub_component: 'baz' }
+            ] },
+            { component: [{ sub_component: 'bing' }] }
+          ] }]
+        }
+        assert_equal expectation, response
+      end
+    end
+
+    describe '#fields' do
+      it 'should parse multiple fields' do
+        response = @klass.send(:fields).parse('spam|eggs')
+        expectation = [
+          { field: [
+            { repetition: [{ component: [{ sub_component: 'spam' }] }] }
+          ] },
+          { field: [
+            { repetition: [{ component: [{ sub_component: 'eggs' }] }] }
+          ] }
+        ]
+        assert_equal expectation, response
+      end
+    end
   #   },
   #   {
   #     input: 'PV1|spam|green^eggs|knights^of&the^round|just&sub&components',
@@ -240,7 +210,5 @@ class HL7ParserTest < Minitest::Test
   #       }
   #     }
   #   }
-  # ].each do |h|
-  #   equality_test_for(h)
-  # end
+  end
 end
