@@ -6,30 +6,30 @@ module HL7
   class Parser < Parslet::Parser
     attr_accessor :fd, :cd, :rd, :sd
     def initialize(options = {})
-      @set_field_delimiter = options[:fd]
-      @set_component_delimiter = options[:cd]
-      @set_repetition_delimiter = options[:rd]
-      @set_subcomponent_delimiter = options[:sd]
+      @field_delimiter = options[:fd]
+      @component_delimiter = options[:cd]
+      @repetition_delimiter = options[:rd]
+      @subcomponent_delimiter = options[:sd]
     end
 
     rule(:valid_delimiters) { str('|') | str('^') | str('&') | str('~') }
     rule(:segment_delimiter) { str("\r") }
     rule(:field_delimiter) do
-      @set_field_delimiter.nil? ? valid_delimiters : str(@set_field_delimiter)
+      @field_delimiter.nil? ? valid_delimiters : str(@field_delimiter)
     end
     rule(:component_delimiter) do
-      @set_component_delimiter.nil? ? valid_delimiters : str(@set_component_delimiter)
+      @component_delimiter.nil? ? valid_delimiters : str(@component_delimiter)
     end
     rule(:sub_component_delimiter) do
-      if @set_subcomponent_delimiter.nil?
+      if @subcomponent_delimiter.nil?
         valid_delimiters
       else
-        str(@set_subcomponent_delimiter)
+        str(@subcomponent_delimiter)
       end
     end
     rule(:escape) { str('\\') }
     rule(:repetition_delimiter) do
-      @set_repetition_delimiter.nil? ? valid_delimiters : str(@set_repetition_delimiter)
+      @repetition_delimiter.nil? ? valid_delimiters : str(@repetition_delimiter)
     end
     rule(:normal_character) do
       (

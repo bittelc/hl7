@@ -5,7 +5,7 @@ require 'pry'
 class HL7ParserTest < Minitest::Test
   describe 'Parser' do
     before do
-      @klass = HL7::Parser.new
+      @klass = HL7::Parser.new(fd: '|', cd: '^', rd: '~', sd: '&')
     end
 
     describe 'sub_component' do
@@ -31,8 +31,7 @@ class HL7ParserTest < Minitest::Test
 
     describe 'hard_coding' do
       it 'should hardcode the delimiter values' do
-        new_class = HL7::Parser.new(fd: '|', cd: '^', rd: '~', sd: '&')
-        response = new_class.send(:components).parse('foo^bar')
+        response = @klass.send(:components).parse('foo^bar')
         expectation = [
           { component: [{ sub_component: 'foo' }] },
           { component: [{ sub_component: 'bar' }] }
