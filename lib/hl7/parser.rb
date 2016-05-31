@@ -4,21 +4,33 @@ module HL7
   # TODO: doc
   # :nodoc:
   class Parser < Parslet::Parser
-    attr_accessor :field_delimiter, :component_delimiter, :repetition_delimiter, :subcomponent_delimiter
+    attr_accessor :fd, :cd, :rd, :sd
     def initialize(options = {})
-        self.field_delimiter = options[:field] || ''
-        self.component_delimiter = options[:component] || ''
-        self.repetition_delimiter = options[:repetition] || ''
-        self.subcomponent_delimiter = options[:subcomponent] || ''
+      @set_field_delimiter = options[:fd]
+      @set_component_delimiter = options[:cd]
+      @set_repetition_delimiter = options[:rd]
+      @set_subcomponent_delimiter = options[:sd]
     end
 
     rule(:valid_delimiters) { str('|') | str('^') | str('&') | str('~') }
     rule(:segment_delimiter) { str("\r") }
-    rule(:field_delimiter) { valid_delimiters }
-    rule(:component_delimiter) { valid_delimiters }
-    rule(:sub_component_delimiter) { valid_delimiters }
+    rule(:field_delimiter) do
+      @set_field_delimiter.nil? ? valid_delimiters : str(@set_field_delimiter)
+    end
+    rule(:component_delimiter) do
+      @set_component_delimiter.nil? ? valid_delimiters : str(@set_component_delimiter)
+    end
+    rule(:sub_component_delimiter) do
+      if @set_subcomponent_delimiter.nil?
+        valid_delimiters
+      else
+        str(@set_subcomponent_delimiter)
+      end
+    end
     rule(:escape) { str('\\') }
-    rule(:repetition_delimiter) { valid_delimiters }
+    rule(:repetition_delimiter) do
+      @set_repetition_delimiter.nil? ? valid_delimiters : str(@set_repetition_delimiter)
+    end
     rule(:normal_character) do
       (
         segment_delimiter |

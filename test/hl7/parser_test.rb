@@ -18,23 +18,26 @@ class HL7ParserTest < Minitest::Test
 
     describe 'sub_components' do
       it 'should contain two subcomponents' do
-        response = @klass.send(:sub_components).parse('foo&bar')
-        expectation = { sub_component: 'foo' }, { sub_component: 'bar' }
+        response = @klass.send(:components).parse('foo&bar')
+        expectation = [{
+          component: [
+            { sub_component: 'foo' },
+            { sub_component: 'bar' }
+          ]
+        }]
         assert_equal expectation, response
       end
     end
 
     describe 'hard_coding' do
       it 'should hardcode the delimiter values' do
-        new_class = HL7::Parser.new(field_delimiter: '|', component_delimiter: '^', repeition_delimiter: '~', subcomponent_delimiter: '&')
-        binding.pry
-        expectation = {
-        component: [
-          { sub_component: 'foo' },
-          { sub_component: 'bar' }
+        new_class = HL7::Parser.new(fd: '|', cd: '^', rd: '~', sd: '&')
+        response = new_class.send(:components).parse('foo^bar')
+        expectation = [
+          { component: [{ sub_component: 'foo' }] },
+          { component: [{ sub_component: 'bar' }] }
         ]
-      }
-        assert_equal expectation, new_class.parse('foo&bar') 
+        assert_equal expectation, response
       end
     end
   end
