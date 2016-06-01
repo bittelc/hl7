@@ -6,11 +6,15 @@ module HL7
   class Parser < Parslet::Parser
     attr_accessor :fd, :cd, :rd, :sd
     def initialize(options = {})
-      @field_delimiter = options[:fd]
-      @component_delimiter = options[:cd]
-      @repetition_delimiter = options[:rd]
-      @subcomponent_delimiter = options[:sd]
+      set_delimiters(options)
     end
+    def set_delimiters(delimiters = {})
+      @field_delimiter = delimiters[:fd]
+      @component_delimiter = delimiters[:cd]
+      @repetition_delimiter = delimiters[:rd]
+      @subcomponent_delimiter = delimiters[:sd]
+    end
+
 
     rule(:valid_delimiters) { str('|') | str('^') | str('&') | str('~') }
     rule(:segment_delimiter) { str("\r") }
@@ -65,6 +69,7 @@ module HL7
         escape.as(:escape) >>
         sub_component_delimiter.as(:sub_component_delimiter) >>
         field_delimiter.as(:field_delimiter)
+        set_delimiters(fd: @field_delimiter, cd: @component_delimiter, rd: @repetition_delimiter, sd: @sub_component_delimiter)
       )
     end
     rule(:msh_segment) do
@@ -84,5 +89,3 @@ module HL7
     root(:message)
   end
 end
-# Can call parser with
-# irb> pp HL7::Parse.new.parse("MSH....")

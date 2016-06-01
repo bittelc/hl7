@@ -173,7 +173,9 @@ class HL7ParserTest < Minitest::Test
 
     describe '#field' do
       it 'should parse multiple fields' do
-        response = @klass.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
+        response = HL7::Parser.new.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
+        #response = @klass.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
+        
         expectation = {
           message: {
             header: {
@@ -222,12 +224,12 @@ class HL7ParserTest < Minitest::Test
       end
     end
     
-    describe 'delimiters' do
-      it 'are not allowed to be repeated' do
-        response = @klass.parse("MSH|^^\\&|\rPID|foo&sop^baz~foo2^ro|bar")
-        expectation = "failure, repeated segment"
-        assert_equal expectation, response
-      end
-    end
+    # describe 'delimiters' do
+    #   it 'are not allowed to be repeated' do
+    #     response = @klass.parse("MSH|^^\\&|\rPID|foo&sop^baz~foo2^ro|bar")
+    #     expectation = "failure, repeated segment"
+    #     assert_equal expectation, response
+    #   end
+    # end
   end
 end
