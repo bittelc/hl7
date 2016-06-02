@@ -1,225 +1,195 @@
 require 'test_helper'
 require 'hl7/parser'
-require 'pry'
 
 class HL7ParserTest < Minitest::Test
-  describe 'Parser' do
-    before do
-      @klass = HL7::Parser.new(fd: '|', cd: '^', rd: '~', sd: '&')
-    end
+  def setup
+    @klass = HL7::Parser.new(fd: '|', cd: '^', rd: '~', sd: '&')
+  end
 
-    describe '#sub_component' do
-      it 'should parse a single sub_component' do
-        response = @klass.send(:sub_component).parse('foo')
-        expectation = { sub_component: 'foo' }
-        assert_equal expectation, response
-      end
+  # rubocop:disable MethodLength
+  def self.equality_test_for(
+    input: '',
+    expectation: nil,
+    parse_method: nil,
+    skipped: false
+  )
+    @counter ||= 0
+    @counter += 1
+    define_method("test_#{@counter}_#{parse_method}") do
+      skip if skipped
+      assert_equal expectation, @klass.send(parse_method).parse(input)
     end
+  end
+  # rubocop:enable MethodLength
 
-    describe '#sub_components' do
-      it 'should parse mutliple sub_components' do
-        response = @klass.send(:sub_components).parse('foo&bar&')
-        expectation = [
+  [
+    {
+      input: 'foo',
+      expectation: { sub_component: 'foo' },
+      parse_method: :sub_component
+    },
+    {
+      input: 'foo&bar&',
+      expectation: [
+        { sub_component: 'foo' },
+        { sub_component: 'bar' }
+      ],
+      parse_method: :sub_components
+    },
+    {
+      input: 'foo&bar',
+      expectation: {
+        component: [
           { sub_component: 'foo' },
           { sub_component: 'bar' }
         ]
-        assert_equal expectation, response
-      end
-    end
-    describe '#component' do
-      it 'should contain child sub_components' do
-        response = @klass.send(:component).parse('foo&bar')
-        expectation = { component: [
-          { sub_component: 'foo' },
-          { sub_component: 'bar' }
-        ] }
-        assert_equal expectation, response
-      end
-    end
-    describe '#components' do
-      it 'should parse multiple components' do
-        response = @klass.send(:components).parse('foo^bar')
-        expectation = [
+      },
+      parse_method: :component
+    },
+    {
+      input: 'foo^bar',
+      expectation: [
+        { component: [{ sub_component: 'foo' }] },
+        { component: [{ sub_component: 'bar' }] }
+      ],
+      parse_method: :components
+    },
+    {
+      parse_method: :repetition,
+      input: 'foo^bar',
+      expectation: {
+        repetition: [
           { component: [{ sub_component: 'foo' }] },
           { component: [{ sub_component: 'bar' }] }
         ]
-        assert_equal expectation, response
-      end
-    end
-    describe '#repetition' do
-      it 'should contain child components' do
-        response = @klass.send(:repetition).parse('foo^bar')
-        expectation = {
-          repetition: [
-            { component: [{ sub_component: 'foo' }] },
-            { component: [{ sub_component: 'bar' }] }
+      }
+    },
+    {
+      parse_method: :repetitions,
+      input: 'foo^bar~baz^quxx',
+      expectation: [
+        { repetition: [
+          { component: [{ sub_component: 'foo' }] },
+          { component: [{ sub_component: 'bar' }] }
+        ] },
+        { repetition: [
+          { component: [{ sub_component: 'baz' }] },
+          { component: [{ sub_component: 'quxx' }] }
+        ] }
+      ]
+    },
+    {
+      input: 'foo^bar&baz&^bing',
+      expectation: {
+        field: [{ repetition: [
+          { component: [{ sub_component: 'foo' }] },
+          { component: [
+            { sub_component: 'bar' },
+            { sub_component: 'baz' }
+          ] },
+          { component: [{ sub_component: 'bing' }] }
+        ] }]
+      },
+      parse_method: :field
+    },
+    {
+      input: 'spam|eggs',
+      expectation: [
+        { field: [
+          { repetition: [{ component: [{ sub_component: 'spam' }] }] }
+        ] },
+        { field: [
+          { repetition: [{ component: [{ sub_component: 'eggs' }] }] }
+        ] }
+      ],
+      parse_method: :fields
+    },
+    {
+      input: 'PV1|spam|green^eggs|knights^of&the^round|just&sub&components',
+      expectation: {
+        segment: {
+          type: 'PV1',
+          fields: [
+            { field: [
+              { repetition: [{ component: [{ sub_component: 'spam' }] }] }
+            ] },
+            { field: [{ repetition: [
+              { component: [{ sub_component: 'green' }] },
+              { component: [{ sub_component: 'eggs' }] }
+            ] }] },
+            { field: [{ repetition: [
+              { component: [{ sub_component: 'knights' }] },
+              {
+                component: [{ sub_component: 'of' }, { sub_component: 'the' }]
+              },
+              { component: [{ sub_component: 'round' }] }
+            ] }] },
+            { field: [{ repetition: [
+              { component: [
+                { sub_component: 'just' },
+                { sub_component: 'sub' },
+                { sub_component: 'components' }
+              ] }
+            ] }] }
           ]
         }
-        assert_equal expectation, response
-      end
-    end
-
-    describe '#repetitions' do
-      it 'should parse multiple repetitions' do
-        response = @klass.send(:repetitions).parse('foo^bar~baz^quxx')
-        expectation = [
-          { repetition: [
-            { component: [{ sub_component: 'foo' }] },
-            { component: [{ sub_component: 'bar' }] }
-          ] },
-          { repetition: [
-            { component: [{ sub_component: 'baz' }] },
-            { component: [{ sub_component: 'quxx' }] }
-          ] }
-        ]
-        assert_equal expectation, response
-      end
-    end
-
-    describe '#field' do
-      it 'should contain child repetitions' do
-        response = @klass.send(:field).parse('foo^bar&baz&^bing')
-        expectation = {
-          field: [{ repetition: [
-            { component: [{ sub_component: 'foo' }] },
-            { component: [
-              { sub_component: 'bar' },
-              { sub_component: 'baz' }
-            ] },
-            { component: [{ sub_component: 'bing' }] }
-          ] }]
+      },
+      parse_method: :segment
+    },
+    {
+      parse_method: :msh_segment,
+      input: 'MSH|^~\\&|another^field',
+      expectation: {
+        header: {
+          type: 'MSH',
+          char_sets: {
+            field_delimiter: '|',
+            component_delimiter: '^',
+            repetition_delimiter: '~',
+            escape: '\\',
+            sub_component_delimiter: '&'
+          },
+          fields: [
+            { field: [{ repetition: [
+              { component: [{ sub_component: 'another' }] },
+              { component: [{ sub_component: 'field' }] }] }]
+            }
+          ]
         }
-        assert_equal expectation, response
-      end
-    end
-
-    describe '#fields' do
-      it 'should parse multiple fields' do
-        response = @klass.send(:fields).parse('spam|eggs')
-        expectation = [
-          { field: [
-            { repetition: [{ component: [{ sub_component: 'spam' }] }] }
-          ] },
-          { field: [
-            { repetition: [{ component: [{ sub_component: 'eggs' }] }] }
-          ] }
-        ]
-        assert_equal expectation, response
-      end
-    end
-
-    describe '#segment' do
-      it 'should contain child fields' do
-        response = @klass.send(:segment).parse(
-          'PV1|spam|green^eggs|knights^of&the^round|just&sub&components'
-        )
-        expectation = {
-          segment: {
-            type: 'PV1',
-            fields: [
-              { field: [
-                { repetition: [{ component: [{ sub_component: 'spam' }] }] }
-              ] },
-              { field: [{ repetition: [
-                { component: [{ sub_component: 'green' }] },
-                { component: [{ sub_component: 'eggs' }] }
-              ] }] },
-              { field: [{ repetition: [
-                { component: [{ sub_component: 'knights' }] },
-                {
-                  component: [{ sub_component: 'of' }, { sub_component: 'the' }]
-                },
-                { component: [{ sub_component: 'round' }] }
-              ] }] },
-              { field: [{ repetition: [
-                { component: [
-                  { sub_component: 'just' },
-                  { sub_component: 'sub' },
-                  { sub_component: 'components' }
-                ] }
-              ] }] }
-            ]
-          }
-        }
-        assert_equal expectation, response
-      end
-    end
-
-    describe '#msh_segment' do
-      it 'should parse delimiters' do
-        custom_class = HL7::Parser.new(fd: '&', cd: '~', rd: '|', sd: '^')
-        response = custom_class.send(:msh_segment).parse('MSH&~|\\^&another~field')
-        expectation = {
+      }
+    },
+    {
+      parse_method: :message,
+      input: "MSH|^~\\&|\rPID|foo|bar",
+      expectation: {
+        message: {
           header: {
             type: 'MSH',
             char_sets: {
-              field_delimiter: '&',
-              component_delimiter: '~',
-              repetition_delimiter: '|',
+              field_delimiter: '|',
+              component_delimiter: '^',
+              repetition_delimiter: '~',
               escape: '\\',
-              sub_component_delimiter: '^'
+              sub_component_delimiter: '&'
             },
-            fields: [
-              { field: [{ repetition: [
-                { component: [{ sub_component: 'another' }] },
-                { component: [{ sub_component: 'field' }] }] }]
-              }
-            ]
-          }
-        }
-        assert_equal expectation, response
-      end
-    end
-
-    describe '#field' do
-      it 'should parse multiple fields' do
-        response = @klass.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
-        expectation = {
-          message: {
-            header: {
-              type: 'MSH',
-              char_sets: {
-                field_delimiter: '|',
-                component_delimiter: '^',
-                repetition_delimiter: '~',
-                escape: '\\',
-                sub_component_delimiter: '&'
-              },
-              fields: []
-            },
-            segments: [
-              { segment: {
-                type: 'PID',
-                fields: [
-                  { field: [
-                    { repetition: [
-                      { component: [
-                        { sub_component: 'foo' },
-                        { sub_component: 'sop' }
-                      ] },
-                      { component: [
-                        { sub_component: 'baz' }
-                      ] }
-                    ] },
-                    { repetition: [
-                      { component: [
-                        { sub_component: 'foo2' }
-                      ] },
-                      { component: [
-                        { sub_component: 'ro' }
-                      ] }
-                    ] }
-                  ] },
-                  { field: [
-                    { repetition: [{ component: [{ sub_component: 'bar' }] }] }
-                  ] }
+            fields: [] },
+          segments: [
+            { segment: {
+              type: 'PID',
+              fields: [
+                { field: [
+                  { repetition: [{ component: [{ sub_component: 'foo' }] }] }
+                ] },
+                { field: [
+                  { repetition: [{ component: [{ sub_component: 'bar' }] }] }
                 ] }
-              }
-            ]
-          }
+              ] }
+            }
+          ]
         }
-        assert_equal expectation, response
-      end
-    end
+      }
+    }
+  ].each do |h|
+    equality_test_for(h)
   end
 end
