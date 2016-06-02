@@ -145,31 +145,31 @@ class HL7ParserTest < Minitest::Test
       end
     end
 
-    describe '#msh_segment' do
-      it 'should parse delimiters' do
-        custom_class = HL7::Parser.new(fd: '&', cd: '~', rd: '|', sd: '^')
-        response = custom_class.send(:msh_segment).parse('MSH&~|\\^&another~field')
-        expectation = {
-          header: {
-            type: 'MSH',
-            char_sets: {
-              field_delimiter: '&',
-              component_delimiter: '~',
-              repetition_delimiter: '|',
-              escape: '\\',
-              sub_component_delimiter: '^'
-            },
-            fields: [
-              { field: [{ repetition: [
-                { component: [{ sub_component: 'another' }] },
-                { component: [{ sub_component: 'field' }] }] }]
-              }
-            ]
-          }
-        }
-        assert_equal expectation, response
-      end
-    end
+    # describe '#msh_segment' do
+    #   it 'should parse delimiters' do
+    #     custom_class = HL7::Parser.new(fd: '&', cd: '~', rd: '|', sd: '^')
+    #     response = custom_class.send(:msh_segment).parse('MSH&~|\\^&another~field')
+    #     expectation = {
+    #       header: {
+    #         type: 'MSH',
+    #         char_sets: {
+    #           field_delimiter: '&',
+    #           component_delimiter: '~',
+    #           repetition_delimiter: '|',
+    #           escape: '\\',
+    #           sub_component_delimiter: '^'
+    #         },
+    #         fields: [
+    #           { field: [{ repetition: [
+    #             { component: [{ sub_component: 'another' }] },
+    #             { component: [{ sub_component: 'field' }] }] }]
+    #           }
+    #         ]
+    #       }
+    #     }
+    #     assert_equal expectation, response
+    #   end
+    # end
 
     describe '#field' do
       it 'should parse multiple fields' do

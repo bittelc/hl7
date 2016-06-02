@@ -19,7 +19,7 @@ module HL7
     rule(:valid_delimiters) { str('|') | str('^') | str('&') | str('~') }
     rule(:segment_delimiter) { str("\r") }
     rule(:field_delimiter) do
-      @field_delimiter.nil? ? valid_delimiters : str(@field_delimiter)
+      @field_delimiter.nil? ? valid_delimiters.capture(:captured_field) : str(@field_delimiter)
     end
     rule(:component_delimiter) do
       @component_delimiter.nil? ? valid_delimiters : str(@component_delimiter)
@@ -67,9 +67,9 @@ module HL7
         component_delimiter.as(:component_delimiter) >>
         repetition_delimiter.as(:repetition_delimiter) >>
         escape.as(:escape) >>
-        sub_component_delimiter.as(:sub_component_delimiter) >>
+        sub_component_delimiter.as(:sub_component_delimiter).capture(:captured_subcomponent) >>
         field_delimiter.as(:field_delimiter)
-        set_delimiters(fd: @field_delimiter, cd: @component_delimiter, rd: @repetition_delimiter, sd: @sub_component_delimiter)
+        binding.pry
       )
     end
     rule(:msh_segment) do
