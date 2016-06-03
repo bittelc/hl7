@@ -19,6 +19,7 @@ module HL7
     rule(:valid_delimiters) { str('|') | str('^') | str('&') | str('~') }
     rule(:segment_delimiter) { str("\r") }
     rule(:field_delimiter) do
+      binding.pry
       @field_delimiter.nil? ? valid_delimiters.capture(:captured_field) : str(@field_delimiter)
     end
     rule(:component_delimiter) do
@@ -69,7 +70,6 @@ module HL7
         escape.as(:escape) >>
         sub_component_delimiter.as(:sub_component_delimiter).capture(:captured_subcomponent) >>
         field_delimiter.as(:field_delimiter)
-        binding.pry
       )
     end
     rule(:msh_segment) do

@@ -174,8 +174,6 @@ class HL7ParserTest < Minitest::Test
     describe '#field' do
       it 'should parse multiple fields' do
         response = HL7::Parser.new.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
-        #response = @klass.parse("MSH|^~\\&|\rPID|foo&sop^baz~foo2^ro|bar")
-        
         expectation = {
           message: {
             header: {
